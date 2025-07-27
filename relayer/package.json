@@ -1,0 +1,33 @@
+{
+  "name": "polkavex-relayer",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@polkadot/api": "^16.4.2",
+    "@polkadot/keyring": "^13.5.3",
+    "dotenv": "^17.2.1",
+    "ethers": "^6.15.0",
+    "express": "^5.1.0",
+    "openai": "^5.10.2",
+    "socket.io": "^4.8.1",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.23",
+    "@types/node": "^24.1.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "description": "Relayer service for Polkavex cross-chain swaps",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon --exec ts-node index.ts",
+    "build": "tsc",
+    "test": "echo \"Relayer tests will be added in Day 5\""
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs"
+}

@@ -1,0 +1,50 @@
+{
+  "name": "polkavex",
+  "version": "1.0.0",
+  "description": "Cross-chain DeFi bridge between Ethereum and Polkadot with AI-optimized parachain routing",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm run install:ethereum && npm run install:ui && npm run install:relayer && npm run install:polkadot",
+    "install:ethereum": "cd ethereum && npm install",
+    "install:ui": "cd ui && npm install",
+    "install:relayer": "cd relayer && npm install",
+    "install:polkadot": "cd polkadot && source ~/.cargo/env && cargo check",
+    "dev": "concurrently \"npm run dev:relayer\" \"npm run dev:ui\"",
+    "dev:ethereum": "cd ethereum && npx hardhat node",
+    "dev:ui": "cd ui && npm start",
+    "dev:relayer": "cd relayer && npm run dev",
+    "dev:polkadot": "cd polkadot && source ~/.cargo/env && cargo build",
+    "test": "npm run test:ethereum && npm run test:relayer",
+    "test:ethereum": "cd ethereum && npx hardhat test",
+    "test:relayer": "cd relayer && npm test",
+    "build": "npm run build:ui && npm run build:relayer && npm run build:polkadot",
+    "build:ui": "cd ui && npm run build",
+    "build:relayer": "cd relayer && npm run build",
+    "build:polkadot": "cd polkadot && source ~/.cargo/env && cargo build --release",
+    "deploy:sepolia": "cd ethereum && npx hardhat run scripts/deploy.js --network sepolia",
+    "start": "npm run dev"
+  },
+  "keywords": [
+    "defi",
+    "cross-chain",
+    "ethereum",
+    "polkadot",
+    "bridge",
+    "ai",
+    "fusion",
+    "1inch"
+  ],
+  "author": "Vivek",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/polkavex.git"
+  }
+}

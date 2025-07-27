@@ -1,0 +1,11 @@
+[package]
+name = "polkavex-node"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Simple dependencies for Day 0 - will use proper Substrate template in Day 2
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+
+
