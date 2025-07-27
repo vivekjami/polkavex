@@ -111,7 +111,7 @@ graph TB
 ## Development Progress
 
 - [x] Project setup and architecture design
-- [ ] Ethereum Fusion+ contract deployment
+- [x] Ethereum Fusion+ contract deployment
 - [ ] Substrate pallet with XCM integration
 - [ ] AI routing system implementation
 - [ ] Bidirectional swap logic
