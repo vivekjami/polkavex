@@ -126,7 +126,7 @@ graph TB
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/polkavex.git
+git clone https://github.com/vivekjami/polkavex.git
 cd polkavex
 
 # Install dependencies
