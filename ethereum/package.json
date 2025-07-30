@@ -3,7 +3,9 @@
   "scripts": {
     "test": "hardhat test",
     "compile": "hardhat compile",
-    "deploy": "hardhat run scripts/deploy-fusion.ts --network sepolia"
+    "deploy": "hardhat run scripts/deploy-fusion.ts --network sepolia",
+    "deploy:local": "hardhat run scripts/deploy-fusion.ts --network localhost",
+    "verify": "hardhat verify --network sepolia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",

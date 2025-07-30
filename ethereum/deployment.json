@@ -1,0 +1,18 @@
+{
+  "contract": "FusionEscrow",
+  "address": "0xec1a9564BAF6C60Cf82dAE85D88d6D4E61B296e4",
+  "network": "sepolia",
+  "deployedAt": "2025-07-30T11:13:26.082Z",
+  "deployer": "0x71D674e5Ca834c0D98259342Eb74Dbf53dD4512A",
+  "txHash": "0x62937f0a1c4ecc1205556c51c92081f2aa106c931c17ffb69734b7075b54d7c8",
+  "etherscan": "https://sepolia.etherscan.io/address/0xec1a9564BAF6C60Cf82dAE85D88d6D4E61B296e4",
+  "verified": true,
+  "features": [
+    "Multi-asset support (ETH, ERC-20, ERC-721)",
+    "Hash-time-locked contracts (HTLC)",
+    "OpenZeppelin security (ReentrancyGuard, Ownable)",
+    "1inch Fusion+ compatibility",
+    "Gas optimized",
+    "Comprehensive event logging"
+  ]
+}

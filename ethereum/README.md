@@ -33,7 +33,7 @@ Cross-chain swap infrastructure with 1inch Fusion+ compatibility for the Polkave
 
 ### 📊 Test Results
 ```
-✅ 35 passing tests (100% success rate)
+✅ 26 passing tests (100% success rate) - Clean & Production Ready
 ⛽ Gas usage optimized:
    - Contract deployment: ~1.36M gas
    - Escrow creation: ~207k gas  
@@ -41,6 +41,14 @@ Cross-chain swap infrastructure with 1inch Fusion+ compatibility for the Polkave
    - Complete: ~48k gas
    - Cancel: ~45k gas
 ```
+
+### 🚀 DEPLOYED TO SEPOLIA! ✅
+
+**Contract Address**: `0xec1a9564BAF6C60Cf82dAE85D88d6D4E61B296e4`  
+**Etherscan**: https://sepolia.etherscan.io/address/0xec1a9564BAF6C60Cf82dAE85D88d6D4E61B296e4  
+**Status**: ✅ Deployed & Verified  
+**Network**: Sepolia Testnet  
+**Deployed**: July 30, 2025
 
 ### 🚀 How to Deploy to Sepolia
 
