@@ -1,0 +1,61 @@
+[package]
+name = "pallet-fusion-escrow"
+version = "1.0.0"
+edition = "2021"
+description = "Polkavex Fusion Escrow Pallet - Cross-chain HTLC with XCM support"
+authors = ["Polkavex Team"]
+license = "MIT"
+
+[dependencies]
+# Substrate primitives
+codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = ["derive"] }
+scale-info = { version = "2.5.0", default-features = false, features = ["derive"] }
+
+# Substrate frame dependencies
+frame-support = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+frame-system = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+frame-benchmarking = { version = "4.0.0-dev", default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+
+# Substrate primitives
+sp-std = { version = "8.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+sp-runtime = { version = "24.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+sp-core = { version = "21.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+
+# XCM support (commented out for initial build)
+# xcm = { package = "staging-xcm", version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
+# xcm-builder = { package = "staging-xcm-builder", version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
+# xcm-executor = { package = "staging-xcm-executor", version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
+
+# Pallet assets for multi-asset support
+pallet-assets = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+
+[dev-dependencies]
+sp-io = { version = "23.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+
+[features]
+default = ["std"]
+std = [
+    "codec/std",
+    "frame-benchmarking?/std",
+    "frame-support/std",
+    "frame-system/std",
+    "scale-info/std",
+    "sp-core/std",
+    "sp-runtime/std",
+    "sp-std/std",
+    # "xcm/std",
+    # "xcm-builder/std", 
+    # "xcm-executor/std",
+    "pallet-assets/std",
+    "pallet-balances/std",
+]
+runtime-benchmarks = [
+    "frame-benchmarking/runtime-benchmarks",
+    "frame-support/runtime-benchmarks",
+    "frame-system/runtime-benchmarks",
+]
+try-runtime = [
+    "frame-support/try-runtime",
+    "frame-system/try-runtime",
+]
