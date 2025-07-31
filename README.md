@@ -8,7 +8,7 @@ Polkavex extends 1inch Fusion+ to enable secure, bidirectional token swaps betwe
 
 This is an early-stage MVP built for ETHGlobal Unite DeFi hackathon. I'm developing solo, learning as I build, and focusing on genuine utility over hype. The goal is simple: make cross-chain swaps actually work well for users.
 
-**Status**: Day 2-3 Complete ✅ - Cross-chain relayer with AI routing operational on Westend testnet. Ready for UI integration and hackathon demonstration.
+**Status**: Cross-chain relayer with AI routing operational on Westend testnet. Ready for UI integration and hackathon demonstration.
 
 ## User Story
 
