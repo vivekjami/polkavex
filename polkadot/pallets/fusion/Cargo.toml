@@ -1,8 +1,8 @@
 [package]
-name = "pallet-fusion-escrow"
+name = "pallet-fusion"
 version = "1.0.0"
 edition = "2021"
-description = "Polkavex Fusion Escrow Pallet - Cross-chain HTLC with XCM support"
+description = "Polkavex Fusion Pallet - Production-grade HTLC with XCM integration for 1inch Fusion+ compatibility"
 authors = ["Polkavex Team"]
 license = "MIT"
 
@@ -22,12 +22,12 @@ sp-core = { version = "21.0.0", default-features = false, git = "https://github.
 pallet-assets = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
-# XCM support - Using correct dependencies
-polkadot-parachain = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-polkadot-runtime-common = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-xcm = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-xcm-builder = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-xcm-executor = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
+# XCM support - Using master branch for latest compatibility
+polkadot-parachain = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
+polkadot-runtime-common = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
+xcm = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
+xcm-builder = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
+xcm-executor = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
 
 # Optional benchmarking
 frame-benchmarking = { version = "4.0.0-dev", default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }

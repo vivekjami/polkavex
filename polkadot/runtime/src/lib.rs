@@ -51,8 +51,8 @@ pub use pallet_timestamp::Call as TimestampCall;
 pub use pallet_transaction_payment::{ConstFeeMultiplier, FungibleAdapter, Multiplier};
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the fusion escrow pallet.
-pub use pallet_fusion_escrow;
+/// Import the fusion pallet.
+pub use pallet_fusion;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -287,17 +287,15 @@ parameter_types! {
     pub const AssetsAdmin: AccountId = AccountId::from([1u8; 32]);
 }
 
-/// Configure the fusion escrow pallet
-impl pallet_fusion_escrow::Config for Runtime {
+/// Configure the fusion pallet
+impl pallet_fusion::Config for Runtime {
     type RuntimeEvent = RuntimeEvent;
-    type Currency = Balances;
     type Assets = Assets;
-    type XcmExecutor = ();  // For now, we'll implement XCM later
+    type XcmTeleportFilter = ();  // For now, we'll implement XCM later
     type WeightInfo = ();
     type MaxEscrowsPerAccount = ConstU32<100>;
-    type MinTimelock = ConstU32<10>;  // 10 blocks minimum
-    type MaxTimelock = ConstU32<518400>;  // ~90 days at 6 second blocks
-    type TimeProvider = pallet_timestamp::Pallet<Runtime>;
+    type MinTimelockBlocks = ConstU32<10>;  // 10 blocks minimum
+    type MaxTimelockBlocks = ConstU32<518400>;  // ~90 days at 6 second blocks
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -315,7 +313,7 @@ construct_runtime!(
         TransactionPayment: pallet_transaction_payment,
         Sudo: pallet_sudo,
         Assets: pallet_assets,
-        FusionEscrow: pallet_fusion_escrow,
+        Fusion: pallet_fusion,
     }
 );
 

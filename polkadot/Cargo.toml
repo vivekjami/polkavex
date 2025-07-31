@@ -8,7 +8,7 @@ license = "MIT"
 
 [workspace]
 members = [
-    "pallets/fusion-escrow",
+    "pallets/fusion",
     "runtime",
 ]
 
@@ -56,7 +56,7 @@ sc-rpc-api = { version = "0.10.0-dev", git = "https://github.com/paritytech/subs
 polkavex-runtime = { path = "runtime" }
 
 # Our pallets
-pallet-fusion-escrow = { path = "pallets/fusion-escrow" }
+pallet-fusion = { path = "pallets/fusion" }
 
 [build-dependencies]
 substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
@@ -65,7 +65,7 @@ substrate-build-script-utils = { version = "3.0.0", git = "https://github.com/pa
 default = []
 runtime-benchmarks = [
     "polkavex-runtime/runtime-benchmarks",
-    "pallet-fusion-escrow/runtime-benchmarks",
+    "pallet-fusion/runtime-benchmarks",
 ]
 
 

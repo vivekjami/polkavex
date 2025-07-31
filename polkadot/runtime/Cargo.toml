@@ -51,7 +51,7 @@ pallet-transaction-payment-rpc-runtime-api = { version = "4.0.0-dev", default-fe
 # xcm-executor = { package = "staging-xcm-executor", version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
 
 # Our custom pallets
-pallet-fusion-escrow = { path = "../pallets/fusion-escrow", default-features = false }
+pallet-fusion = { path = "../pallets/fusion", default-features = false }
 
 [build-dependencies]
 substrate-wasm-builder = { version = "5.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
@@ -103,7 +103,7 @@ std = [
     # "xcm-executor/std",
     
     # Our pallets std
-    "pallet-fusion-escrow/std",
+    "pallet-fusion/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",
@@ -119,7 +119,7 @@ runtime-benchmarks = [
     "sp-runtime/runtime-benchmarks",
     # "xcm-builder/runtime-benchmarks",  # Temporarily disabled
     # "xcm-executor/runtime-benchmarks",  # Temporarily disabled
-    "pallet-fusion-escrow/runtime-benchmarks",
+    "pallet-fusion/runtime-benchmarks",
 ]
 try-runtime = [
     "frame-executive/try-runtime",
@@ -133,5 +133,5 @@ try-runtime = [
     "pallet-sudo/try-runtime",
     "pallet-timestamp/try-runtime",
     "pallet-transaction-payment/try-runtime",
-    "pallet-fusion-escrow/try-runtime",
+    "pallet-fusion/try-runtime",
 ]
