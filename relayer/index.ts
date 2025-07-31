@@ -3,7 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { ethers } from 'ethers';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -17,10 +17,9 @@ const io = new Server(server, {
   }
 });
 
-// Initialize OpenAI
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
-});
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' });
 
 // Initialize providers
 let ethProvider: ethers.Provider;
@@ -215,23 +214,33 @@ class PolkavexRelayer {
 
   async getAIRouteSuggestion(token: string, amount: string, preference: string) {
     try {
-      const prompt = `As a DeFi routing expert, suggest the best Polkadot parachain for a ${amount} ${token} swap.
-      User preference: ${preference}
-      
-      Consider:
-      - Acala: 8% APY for stablecoin yields
-      - Moonbeam: Fast EVM compatibility
-      - Statemint: Asset hub for NFTs/assets
-      
-      Respond with JSON: {"parachain": "name", "reason": "explanation", "estimatedGas": "estimate"}`;
+      const prompt = `You are a DeFi routing API. Respond ONLY with valid JSON, no additional text.
 
-      const response = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages: [{ role: 'user', content: prompt }],
-        max_tokens: 200
-      });
+Suggest the best Polkadot parachain for a ${amount} ${token} swap with preference: ${preference}
 
-      return JSON.parse(response.choices[0].message.content || '{}');
+Options:
+- Acala: 8% APY for stablecoin yields
+- Moonbeam: Fast EVM compatibility  
+- Statemint: Asset hub for NFTs/assets
+
+Response format (JSON only):
+{"parachain": "ParachainName", "reason": "Brief explanation", "estimatedGas": "X.X DOT"}`;
+
+      // Add timeout wrapper
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('AI timeout')), 5000)
+      );
+      
+      const generatePromise = model.generateContent(prompt);
+      
+      const response = await Promise.race([generatePromise, timeoutPromise]) as any;
+      const result = response.response.text().trim();
+      
+      // Extract JSON if the response contains extra text
+      const jsonMatch = result.match(/\{.*\}/s);
+      const jsonStr = jsonMatch ? jsonMatch[0] : result;
+      
+      return JSON.parse(jsonStr);
     } catch (error) {
       console.error('AI suggestion failed:', error);
       return {
