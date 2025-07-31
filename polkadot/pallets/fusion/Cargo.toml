@@ -22,12 +22,12 @@ sp-core = { version = "21.0.0", default-features = false, git = "https://github.
 pallet-assets = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
-# XCM support - Using master branch for latest compatibility
-polkadot-parachain = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
-polkadot-runtime-common = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
-xcm = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
-xcm-builder = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
-xcm-executor = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "master" }
+# XCM support - Temporarily disabled for initial compilation
+# polkadot-parachain = { version = "0.9.43", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v0.9.43" }
+# polkadot-runtime-common = { version = "0.9.43", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v0.9.43" }
+# xcm = { version = "0.9.43", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v0.9.43" }
+# xcm-builder = { version = "0.9.43", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v0.9.43" }
+# xcm-executor = { version = "0.9.43", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v0.9.43" }
 
 # Optional benchmarking
 frame-benchmarking = { version = "4.0.0-dev", default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
@@ -35,6 +35,7 @@ frame-benchmarking = { version = "4.0.0-dev", default-features = false, optional
 [dev-dependencies]
 sp-io = { version = "23.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 pallet-timestamp = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+pallet-insecure-randomness-collective-flip = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
 [features]
 default = ["std"]
@@ -47,11 +48,6 @@ std = [
     "sp-core/std",
     "sp-runtime/std",
     "sp-std/std",
-    "xcm/std",
-    "xcm-builder/std", 
-    "xcm-executor/std",
-    "polkadot-parachain/std",
-    "polkadot-runtime-common/std",
     "pallet-assets/std",
     "pallet-balances/std",
 ]

@@ -27,8 +27,8 @@ fn create_escrow_works() {
             xcm_route,
         ));
         
-        // Check that the escrow was created with ID 0
-        let escrow = Fusion::get_escrow(&0u64).unwrap();
+        // Check that the escrow was created
+        let escrow = Fusion::get_escrow(&1u64).unwrap();
         assert_eq!(escrow.beneficiary, beneficiary);
         assert_eq!(escrow.amount, amount);
         assert_eq!(escrow.state, EscrowState::Created);
@@ -57,11 +57,11 @@ fn fund_escrow_works() {
             None,
         ));
         
-        // Then fund it (escrow ID is 0)
-        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 0u64));
+        // Then fund it
+        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 1u64));
         
         // Check that the escrow state was updated
-        let escrow = Fusion::get_escrow(&0u64).unwrap();
+        let escrow = Fusion::get_escrow(&1u64).unwrap();
         assert_eq!(escrow.state, EscrowState::Active);
         
         // Check that the event was emitted
@@ -91,17 +91,17 @@ fn complete_escrow_works() {
             None,
         ));
         
-        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 0u64));
+        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 1u64));
         
         // Complete the escrow with the secret
         assert_ok!(Fusion::complete_escrow(
             RuntimeOrigin::signed(2),
-            0u64,
+            1u64,
             secret.to_vec(),
         ));
         
         // Check that the escrow state was updated
-        let escrow = Fusion::get_escrow(&0u64).unwrap();
+        let escrow = Fusion::get_escrow(&1u64).unwrap();
         assert_eq!(escrow.state, EscrowState::Completed);
     });
 }
@@ -121,7 +121,7 @@ fn cancel_escrow_works() {
             None,
         ));
         
-        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 0u64));
+        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 1u64));
         
         // Wait for timelock to expire
         run_to_block(20);
@@ -129,12 +129,12 @@ fn cancel_escrow_works() {
         // Cancel the escrow
         assert_ok!(Fusion::cancel_escrow(
             RuntimeOrigin::signed(1),
-            0u64,
+            1u64,
             b"Timelock expired".to_vec(),
         ));
         
         // Check that the escrow state was updated
-        let escrow = Fusion::get_escrow(&0u64).unwrap();
+        let escrow = Fusion::get_escrow(&1u64).unwrap();
         assert_eq!(escrow.state, EscrowState::Cancelled);
     });
 }
@@ -195,13 +195,13 @@ fn invalid_secret_fails() {
             None,
         ));
         
-        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 0u64));
+        assert_ok!(Fusion::fund_escrow(RuntimeOrigin::signed(1), 1u64));
         
         // Try to complete with wrong secret
         assert_noop!(
             Fusion::complete_escrow(
                 RuntimeOrigin::signed(2),
-                0u64,
+                1u64,
                 b"wrong_secret".to_vec(),
             ),
             Error::<Test>::IncorrectSecret

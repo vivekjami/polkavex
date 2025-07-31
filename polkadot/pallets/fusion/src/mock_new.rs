@@ -3,7 +3,7 @@
 use crate as pallet_fusion;
 use frame_support::{
     construct_runtime, parameter_types,
-    traits::{ConstU32, Everything, Hooks},
+    traits::{ConstU32, Everything},
     PalletId,
 };
 use sp_core::H256;
@@ -98,7 +98,6 @@ parameter_types! {
     pub const StringLimit: u32 = 50;
     pub const MetadataDepositBase: u128 = 10;
     pub const MetadataDepositPerByte: u128 = 1;
-    pub const AssetAccountDeposit: u128 = 100;
 }
 
 impl pallet_assets::Config for Test {
@@ -110,7 +109,7 @@ impl pallet_assets::Config for Test {
     type CreateOrigin = frame_support::traits::AsEnsureOriginWithArg<frame_system::EnsureSigned<u64>>;
     type ForceOrigin = frame_system::EnsureRoot<u64>;
     type AssetDeposit = AssetDeposit;
-    type AssetAccountDeposit = AssetAccountDeposit;
+    type AssetAccountDeposit = ConstU32<100>;
     type MetadataDepositBase = MetadataDepositBase;
     type MetadataDepositPerByte = MetadataDepositPerByte;
     type ApprovalDeposit = ApprovalDeposit;
