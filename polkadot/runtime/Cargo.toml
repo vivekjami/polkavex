@@ -115,10 +115,10 @@ runtime-benchmarks = [
     "pallet-grandpa/runtime-benchmarks",
     "pallet-sudo/runtime-benchmarks",
     "pallet-timestamp/runtime-benchmarks",
-    "pallet-transaction-payment/runtime-benchmarks",
+    # "pallet-transaction-payment/runtime-benchmarks",  # Not available in this version
     "sp-runtime/runtime-benchmarks",
-    "xcm-builder/runtime-benchmarks",
-    "xcm-executor/runtime-benchmarks",
+    # "xcm-builder/runtime-benchmarks",  # Temporarily disabled
+    # "xcm-executor/runtime-benchmarks",  # Temporarily disabled
     "pallet-fusion-escrow/runtime-benchmarks",
 ]
 try-runtime = [

@@ -2,12 +2,11 @@
 name = "pallet-fusion-escrow"
 version = "1.0.0"
 edition = "2021"
-description = "Polkavex Fusion Escrow Pallet - Cross-chain HTLC with XCM support"
+description = "Polkavex Fusion Escrow Pallet - Cross-chain HTLC (simplified for Day 2)"
 authors = ["Polkavex Team"]
 license = "MIT"
 
 [dependencies]
-# Substrate primitives
 codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = ["derive"] }
 scale-info = { version = "2.5.0", default-features = false, features = ["derive"] }
 
@@ -18,22 +17,12 @@ sp-std = { version = "8.0.0", default-features = false, git = "https://github.co
 sp-runtime = { version = "24.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-core = { version = "21.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
-# Multi-asset support
-pallet-assets = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
-pallet-balances = { version = "4.0.0-dev", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
-
-# XCM support - Using correct dependencies
-polkadot-parachain = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-polkadot-runtime-common = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-xcm = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-xcm-builder = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-xcm-executor = { version = "1.0.0", default-features = false, git = "https://github.com/paritytech/polkadot.git", branch = "release-v1.0.0" }
-
 # Optional benchmarking
 frame-benchmarking = { version = "4.0.0-dev", default-features = false, optional = true, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
 [dev-dependencies]
 sp-io = { version = "23.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+pallet-balances = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 pallet-timestamp = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 
 [features]
@@ -47,24 +36,13 @@ std = [
     "sp-core/std",
     "sp-runtime/std",
     "sp-std/std",
-    "xcm/std",
-    "xcm-builder/std", 
-    "xcm-executor/std",
-    "polkadot-parachain/std",
-    "polkadot-runtime-common/std",
-    "pallet-assets/std",
-    "pallet-balances/std",
 ]
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",
     "frame-support/runtime-benchmarks",
     "frame-system/runtime-benchmarks",
-    "pallet-assets/runtime-benchmarks",
-    "pallet-balances/runtime-benchmarks",
 ]
 try-runtime = [
     "frame-support/try-runtime",
     "frame-system/try-runtime",
-    "pallet-assets/try-runtime",
-    "pallet-balances/try-runtime",
 ]

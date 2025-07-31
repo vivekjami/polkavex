@@ -67,8 +67,7 @@ use sp_runtime::{
     ArithmeticError,
 };
 use sp_std::{vec::Vec, collections::btree_map::BTreeMap};
-// XCM temporarily disabled for initial build
-// use xcm::prelude::*;
+use xcm::prelude::*;
 
 /// Pallet ID for generating sovereign accounts
 const PALLET_ID: PalletId = PalletId(*b"plkv/esc");
@@ -94,8 +93,8 @@ pub mod pallet {
             + Mutate<Self::AccountId, AssetId = u32, Balance = u128>
             + Transfer<Self::AccountId, AssetId = u32, Balance = u128>;
 
-        /// XCM executor for cross-chain operations (temporarily disabled)
-        // type XcmExecutor: ExecuteXcm<Self::RuntimeCall>;
+        /// XCM executor for cross-chain operations
+        type XcmExecutor: ExecuteXcm<Self::RuntimeCall>;
 
         /// Weight information for extrinsics
         type WeightInfo: WeightInfo;
@@ -157,8 +156,8 @@ pub mod pallet {
         pub amount: u128,
         /// Current state of the escrow
         pub state: EscrowState,
-        /// Optional XCM destination for cross-parachain routing (temporarily disabled)
-        pub xcm_destination: Option<u32>,  // Placeholder for MultiLocation
+        /// Optional XCM destination for cross-parachain routing
+        pub xcm_destination: Option<MultiLocation>,
         /// Block when escrow was created
         pub created_block: BlockNumber,
         /// Optional metadata for additional context
