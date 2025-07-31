@@ -6,11 +6,13 @@
   "dependencies": {
     "@polkadot/api": "^16.4.2",
     "@polkadot/keyring": "^13.5.3",
+    "axios": "^1.7.9",
     "dotenv": "^17.2.1",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
     "openai": "^5.10.2",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "ws": "^8.18.3"
   },
   "devDependencies": {
@@ -25,7 +27,8 @@
     "start": "node dist/index.js",
     "dev": "nodemon --exec ts-node index.ts",
     "build": "tsc",
-    "test": "echo \"Relayer tests will be added in Day 5\""
+    "test": "ts-node test-relayer.ts",
+    "test:relayer": "echo \"Starting relayer...\" && npm run dev &; sleep 5 && npm run test; kill %1"
   },
   "keywords": [],
   "author": "",

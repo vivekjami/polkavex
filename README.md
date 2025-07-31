@@ -8,7 +8,7 @@ Polkavex extends 1inch Fusion+ to enable secure, bidirectional token swaps betwe
 
 This is an early-stage MVP built for ETHGlobal Unite DeFi hackathon. I'm developing solo, learning as I build, and focusing on genuine utility over hype. The goal is simple: make cross-chain swaps actually work well for users.
 
-**Status**: Active development started July 26, 2025. Daily commits tracking progress.
+**Status**: Day 2-3 Complete ✅ - Cross-chain relayer with AI routing operational on Westend testnet. Ready for UI integration and hackathon demonstration.
 
 ## User Story
 
@@ -154,6 +154,33 @@ npm run test:routing
 # End-to-end swap simulation
 npm run test:e2e
 ```
+
+## Progress Update (July 31, 2025)
+
+### ✅ Day 2-3 Complete: Cross-Chain Relayer
+- **Production-ready Node.js relayer** with TypeScript, Express, WebSocket support
+- **Live Polkadot connection** to Westend testnet (verified working)
+- **AI-powered routing** using OpenAI for intelligent parachain selection
+- **Cross-chain event monitoring** for Ethereum ↔ Polkadot escrow synchronization
+- **RESTful API** with endpoints for swap initiation, status tracking, and claiming
+- **Real-time updates** via WebSocket for immediate swap progress notifications
+
+**Demo Ready Features:**
+- 🔗 **Cross-chain bridge logic**: Ethereum ↔ Polkadot escrow mirroring
+- 🤖 **AI routing**: Smart parachain suggestions based on user preferences
+- ⚡ **Real-time tracking**: Live swap progress via WebSocket
+- 🧪 **Comprehensive testing**: All endpoints verified working
+- 📊 **Health monitoring**: System status and connection verification
+
+**Technical Stack:**
+- Backend: Node.js, TypeScript, Express.js
+- Blockchain: Ethers.js (Ethereum), @polkadot/api (Polkadot)
+- AI: OpenAI SDK for routing intelligence
+- Communication: Socket.IO for real-time updates
+- Testing: Automated endpoint testing
+
+### Next: Day 4 UI Development
+Building React dashboard for user-friendly swap interface with real-time progress tracking.
 
 ## Roadmap
 
