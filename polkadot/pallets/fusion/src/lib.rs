@@ -78,9 +78,31 @@ pub enum AssetInfo<AssetId> {
     Native,
     /// Parachain fungible asset
     Asset(AssetId),
-    /// Future: NFT support
-    #[allow(dead_code)]
-    Nft(AssetId, u32), // (collection_id, item_id)
+    /// Day 5: Stablecoin with enhanced metadata
+    Stablecoin { asset_id: AssetId, decimals: u8, symbol: BoundedVec<u8, ConstU32<32>> },
+    /// NFT support for Day 5 enhancements
+    Nft { collection_id: AssetId, item_id: u32, metadata: BoundedVec<u8, ConstU32<256>> },
+}
+
+/// Asset type classification for routing optimization
+#[derive(Encode, Decode, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+pub enum AssetType {
+    Native,
+    Fungible,
+    Stablecoin,
+    Nft,
+}
+
+impl<AssetId> AssetInfo<AssetId> {
+    /// Get the asset type for routing decisions
+    pub fn asset_type(&self) -> AssetType {
+        match self {
+            AssetInfo::Native => AssetType::Native,
+            AssetInfo::Asset(_) => AssetType::Fungible,
+            AssetInfo::Stablecoin { .. } => AssetType::Stablecoin,
+            AssetInfo::Nft { .. } => AssetType::Nft,
+        }
+    }
 }
 
 /// XCM routing information for cross-chain operations

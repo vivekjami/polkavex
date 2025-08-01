@@ -52,6 +52,9 @@ contract FusionEscrow is Ownable, ReentrancyGuard {
     uint256 public constant MIN_TIMELOCK_DURATION = 1 hours;
     uint256 public constant MAX_TIMELOCK_DURATION = 30 days;
     
+    // Known stablecoin addresses for enhanced routing
+    mapping(address => bool) public knownStablecoins;
+    
     // Events for comprehensive on-chain tracking
     event EscrowCreated(
         uint256 indexed escrowId, 
@@ -83,7 +86,9 @@ contract FusionEscrow is Ownable, ReentrancyGuard {
         address indexed maker,
         string reason
     );
-
+    event StablecoinAdded(address indexed token, string symbol);
+    event AssetTypeDetected(uint256 indexed escrowId, AssetType assetType, bool isStablecoin);
+    
     // Custom errors for gas efficiency
     error InvalidTimelock();
     error EscrowNotFound();
@@ -94,6 +99,72 @@ contract FusionEscrow is Ownable, ReentrancyGuard {
     error InsufficientValue();
     error TransferFailed();
     error SecretHashAlreadyUsed();
+    error InvalidAsset(); // Day 5 enhancement
+
+    /**
+     * @dev Add known stablecoin addresses (owner only)
+     * @param tokenAddress Address of the stablecoin contract
+     * @param symbol Symbol for logging purposes
+     */
+    function addStablecoin(address tokenAddress, string calldata symbol) external onlyOwner {
+        knownStablecoins[tokenAddress] = true;
+        emit StablecoinAdded(tokenAddress, symbol);
+    }
+    
+    /**
+     * @dev Check if an asset is a known stablecoin
+     * @param asset Address to check
+     * @return true if the asset is a registered stablecoin
+     */
+    function isStablecoin(address asset) public view returns (bool) {
+        // Check our registry first
+        if (knownStablecoins[asset]) {
+            return true;
+        }
+        
+        // Hardcoded check for major stablecoins (mainnet addresses)
+        // USDC mainnet: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+        // USDT mainnet: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+        // DAI mainnet: 0x6B175474E89094C44Da98b954EedeAC495271d0F
+        return asset == 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 || // USDC
+               asset == 0xdAC17F958D2ee523a2206206994597C13D831ec7 || // USDT
+               asset == 0x6B175474E89094C44Da98b954EedeAC495271d0F;   // DAI
+    }
+    
+    /**
+     * @dev Enhanced asset validation with stablecoin detection
+     * @param assetAddress Address of the asset
+     * @param assetType Declared asset type
+     * @return isValid Whether the asset type matches the address
+     * @return detectedStablecoin Whether this is a stablecoin
+     */
+    function validateAssetType(address assetAddress, AssetType assetType) 
+        public view returns (bool isValid, bool detectedStablecoin) {
+        
+        if (assetType == AssetType.ETH) {
+            return (assetAddress == address(0), false);
+        }
+        
+        if (assetType == AssetType.ERC20) {
+            // Check if it's a valid ERC20 (has required functions)
+            try IERC20(assetAddress).totalSupply() returns (uint256) {
+                return (true, isStablecoin(assetAddress));
+            } catch {
+                return (false, false);
+            }
+        }
+        
+        if (assetType == AssetType.ERC721) {
+            // Check if it's a valid ERC721
+            try IERC721(assetAddress).supportsInterface(0x80ac58cd) returns (bool supported) {
+                return (supported, false);
+            } catch {
+                return (false, false);
+            }
+        }
+        
+        return (false, false);
+    }
 
     /**
      * @dev Create a new escrow with hashlock and timelock for 1inch Fusion+ compatibility
@@ -127,6 +198,12 @@ contract FusionEscrow is Ownable, ReentrancyGuard {
             revert UnauthorizedAccess();
         }
 
+        // Enhanced validation for Day 5
+        (bool isValidAsset, bool detectedStablecoin) = validateAssetType(assetAddress, assetType);
+        if (!isValidAsset) {
+            revert InvalidAsset();
+        }
+
         // Create escrow
         escrowId = ++escrowCounter;
         escrows[escrowId] = Escrow({
@@ -142,6 +219,9 @@ contract FusionEscrow is Ownable, ReentrancyGuard {
         });
         
         secretHashToEscrowId[secretHash] = escrowId;
+        
+        // Emit enhanced events for Day 5
+        emit AssetTypeDetected(escrowId, assetType, detectedStablecoin);
         
         emit EscrowCreated(
             escrowId, 
