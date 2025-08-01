@@ -56,10 +56,12 @@ function App() {
     recentSwaps: []
   });
 
-  // Form state
+  // Day 5: Enhanced form state with asset detection
   const [formData, setFormData] = useState({
     amount: '',
     token: 'USDC',
+    assetType: 'STABLECOIN' as 'ETH' | 'ERC20' | 'STABLECOIN' | 'NFT',
+    tokenId: '', // For NFT swaps
     sourceChain: 'ethereum',
     targetChain: 'polkadot',
     beneficiary: ''
@@ -218,27 +220,77 @@ function App() {
       <div className="swap-form">
         <div className="input-row">
           <div className="input-group">
-            <label>Amount</label>
+            <label>Amount{formData.assetType === 'NFT' ? ' / Token ID' : ''}</label>
             <input
-              type="number"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              placeholder="0.00"
+              type={formData.assetType === 'NFT' ? 'text' : 'number'}
+              value={formData.assetType === 'NFT' ? formData.tokenId : formData.amount}
+              onChange={(e) => {
+                if (formData.assetType === 'NFT') {
+                  setFormData({ ...formData, tokenId: e.target.value });
+                } else {
+                  setFormData({ ...formData, amount: e.target.value });
+                }
+              }}
+              placeholder={formData.assetType === 'NFT' ? 'Token ID (e.g. 1234)' : '0.00'}
             />
           </div>
           <div className="input-group">
-            <label>Token</label>
+            <label>Asset Type</label>
             <select
-              value={formData.token}
-              onChange={(e) => setFormData({ ...formData, token: e.target.value })}
-              title="Select token type"
+              value={formData.assetType}
+              onChange={(e) => {
+                const assetType = e.target.value as 'ETH' | 'ERC20' | 'STABLECOIN' | 'NFT';
+                setFormData({ 
+                  ...formData, 
+                  assetType,
+                  // Update token based on asset type
+                  token: assetType === 'ETH' ? 'ETH' : 
+                         assetType === 'STABLECOIN' ? 'USDC' :
+                         assetType === 'NFT' ? 'NFT-Collection' : 'TOKEN'
+                });
+              }}
+              title="Select asset type"
             >
-              <option value="USDC">USDC</option>
-              <option value="ETH">ETH</option>
-              <option value="DOT">DOT</option>
+              <option value="STABLECOIN">💰 Stablecoin (USDC)</option>
+              <option value="ETH">⚡ ETH</option>
+              <option value="ERC20">🪙 ERC20 Token</option>
+              <option value="NFT">🎨 NFT</option>
             </select>
           </div>
         </div>
+
+        {/* Day 5: Additional NFT fields */}
+        {formData.assetType === 'NFT' && (
+          <div className="input-row">
+            <div className="input-group full-width">
+              <label>NFT Contract Address</label>
+              <input
+                type="text"
+                value={formData.token}
+                onChange={(e) => setFormData({ ...formData, token: e.target.value })}
+                placeholder="0x... (NFT contract address)"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Day 5: Stablecoin info display */}
+        {formData.assetType === 'STABLECOIN' && (
+          <div className="asset-info">
+            <span className="info-badge">
+              💰 Optimized for stablecoin yields via Acala parachain
+            </span>
+          </div>
+        )}
+
+        {/* Day 5: NFT info display */}
+        {formData.assetType === 'NFT' && (
+          <div className="asset-info">
+            <span className="info-badge">
+              🎨 NFT metadata preserved during cross-chain transfer
+            </span>
+          </div>
+        )}
 
         <div className="input-row">
           <div className="input-group">

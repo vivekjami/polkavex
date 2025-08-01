@@ -1,0 +1,42 @@
+{
+  "summary": {
+    "totalSwaps": 50,
+    "successfulSwaps": 50,
+    "failedSwaps": 0,
+    "successRate": "100.00%",
+    "totalDuration": "268.38s",
+    "averageResponseTime": "4875.96ms",
+    "swapsPerSecond": "0.19"
+  },
+  "assetTypeBreakdown": {
+    "ETH": 15,
+    "NFT": 14,
+    "DAI": 15,
+    "USDC": 6
+  },
+  "errors": [],
+  "topPerformingAssets": [
+    {
+      "asset": "ETH",
+      "count": 15
+    },
+    {
+      "asset": "DAI",
+      "count": 15
+    },
+    {
+      "asset": "NFT",
+      "count": 14
+    }
+  ],
+  "performance": {
+    "fastestSwap": 3284,
+    "slowestSwap": 5010,
+    "averageByAsset": {
+      "ETH": "4948.80",
+      "USDC": "5004.17",
+      "DAI": "4972.27",
+      "NFT": "4639.79"
+    }
+  }
+}

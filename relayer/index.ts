@@ -77,63 +77,68 @@ class PolkavexRelayer {
       }
     });
 
-    // Initiate swap with actual implementation
+    // Day 5: Enhanced swap initiation with asset detection
     app.post('/api/initiate-swap', async (req, res) => {
       try {
-        const { secretHash, amount, token, timelock, beneficiary, sourceChain, targetChain } = req.body;
+        const { secretHash, amount, token, tokenId, timelock, beneficiary, sourceChain, targetChain } = req.body;
         
         // Validate input
         if (!secretHash || !amount || !beneficiary || !sourceChain || !targetChain) {
           return res.status(400).json({ error: 'Missing required parameters' });
         }
 
+        // Day 5: Enhanced asset detection
+        const assetInfo = detectAssetType(token || 'ETH', tokenId);
+        const routingOptimization = getOptimalRouting(assetInfo, amount);
+
         // Generate unique swap ID
         const swapId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
-        console.log('🚀 Initiating cross-chain swap:', {
+        console.log('🚀 Day 5 Enhanced swap initiation:', {
           swapId,
-          secretHash,
+          assetInfo,
+          routingOptimization,
           amount,
-          token: token || 'ETH',
           sourceChain,
           targetChain,
           beneficiary
         });
 
-        // Store swap details (in production, use proper database)
-        const swapDetails = {
+        // Store enhanced swap details
+        const enhancedSwapDetails: EnhancedSwapData = {
           swapId,
-          secretHash,
           amount,
-          token: token || 'ETH',
-          timelock: timelock || Math.floor(Date.now() / 1000) + 3600, // 1 hour default
-          beneficiary,
+          assetInfo,
           sourceChain,
           targetChain,
+          beneficiary,
+          secretHash,
+          timelock: timelock || Math.floor(Date.now() / 1000) + 3600,
           status: 'initiated',
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          routingOptimization
         };
 
-        // Emit progress update
-        io.emit('swap-initiated', swapDetails);
+        // Emit progress update with enhanced data
+        io.emit('swap-initiated', enhancedSwapDetails);
 
-        // Get AI routing suggestion
+        // Get AI routing suggestion with asset context
         const routingSuggestion = await this.getAIRouteSuggestion(
-          token || 'ETH', 
+          assetInfo.symbol || 'TOKEN', 
           amount, 
-          `Cross-chain swap from ${sourceChain} to ${targetChain}`
+          `Cross-chain ${assetInfo.type} swap from ${sourceChain} to ${targetChain}. ${routingOptimization}`
         );
 
         res.json({ 
           status: 'initiated',
           swapId,
-          swapDetails,
+          swapDetails: enhancedSwapDetails,
           routingSuggestion,
           message: 'Cross-chain swap initiated successfully'
         });
 
         // Start monitoring this specific swap
-        this.monitorSwapProgress(swapId, swapDetails);
+        this.monitorSwapProgress(swapId, enhancedSwapDetails);
         
       } catch (error) {
         console.error('Swap initiation failed:', error);
@@ -442,5 +447,88 @@ server.listen(PORT, () => {
   console.log(`🚀 Polkavex Relayer running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
 });
+
+// Day 5: Enhanced asset type detection and handling
+interface AssetInfo {
+  type: 'ETH' | 'ERC20' | 'ERC721' | 'STABLECOIN';
+  address?: string;
+  tokenId?: string;
+  decimals?: number;
+  symbol?: string;
+  isStablecoin?: boolean;
+}
+
+interface EnhancedSwapData {
+  swapId: string;
+  amount: string;
+  assetInfo: AssetInfo;
+  sourceChain: string;
+  targetChain: string;
+  beneficiary: string;
+  secretHash: string;
+  timelock: number;
+  status: string;
+  createdAt: string;
+  estimatedGas?: string;
+  routingOptimization?: string;
+}
+
+// Known stablecoin addresses (mainnet and testnet)
+const KNOWN_STABLECOINS: { [address: string]: { symbol: string; decimals: number } } = {
+  '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': { symbol: 'USDC', decimals: 6 }, // mainnet
+  '0xdAC17F958D2ee523a2206206994597C13D831ec7': { symbol: 'USDT', decimals: 6 }, // mainnet
+  '0x6B175474E89094C44Da98b954EedeAC495271d0F': { symbol: 'DAI', decimals: 18 }, // mainnet
+  // Add testnet addresses as needed
+};
+
+// Asset type detection utilities
+function detectAssetType(token: string, tokenId?: string): AssetInfo {
+  if (token === 'ETH' || token === '0x0000000000000000000000000000000000000000') {
+    return { type: 'ETH', symbol: 'ETH', decimals: 18 };
+  }
+  
+  if (tokenId) {
+    return { 
+      type: 'ERC721', 
+      address: token, 
+      tokenId, 
+      symbol: 'NFT' 
+    };
+  }
+  
+  const stablecoinInfo = KNOWN_STABLECOINS[token.toLowerCase()];
+  if (stablecoinInfo) {
+    return {
+      type: 'STABLECOIN',
+      address: token,
+      symbol: stablecoinInfo.symbol,
+      decimals: stablecoinInfo.decimals,
+      isStablecoin: true
+    };
+  }
+  
+  return { 
+    type: 'ERC20', 
+    address: token, 
+    symbol: 'TOKEN',
+    decimals: 18 // default
+  };
+}
+
+function getOptimalRouting(assetInfo: AssetInfo, amount: string): string {
+  if (assetInfo.isStablecoin) {
+    return 'Stablecoin-optimized routing via Acala for yield opportunities';
+  }
+  
+  if (assetInfo.type === 'ERC721') {
+    return 'NFT-specific routing with metadata preservation';
+  }
+  
+  if (assetInfo.type === 'ETH') {
+    return 'Native asset routing for minimal gas costs';
+  }
+  
+  return 'Standard ERC20 routing with liquidity optimization';
+}
 
 export default relayer;

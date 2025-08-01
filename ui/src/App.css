@@ -364,6 +364,80 @@ body {
   width: 100%;
 }
 
+/* Day 5: Enhanced asset selection styles */
+.asset-info {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background-color: #f0f9ff;
+  border-radius: 0.5rem;
+  border: 1px solid #bae6fd;
+}
+
+.info-badge {
+  font-size: 0.875rem;
+  color: #0c4a6e;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.asset-info.nft {
+  background-color: #fef7ff;
+  border-color: #e9d5ff;
+}
+
+.asset-info.nft .info-badge {
+  color: #7c2d92;
+}
+
+.asset-info.stablecoin {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.asset-info.stablecoin .info-badge {
+  color: #166534;
+}
+
+/* Enhanced input styling for different asset types */
+.input-group input[type="text"].nft-input {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+}
+
+.input-group select option {
+  padding: 0.5rem;
+}
+
+/* Asset type indicators */
+.asset-type-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #f3f4f6;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.asset-type-indicator.eth {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.asset-type-indicator.stablecoin {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.asset-type-indicator.nft {
+  background-color: #fae8ff;
+  color: #86198f;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .input-row {
