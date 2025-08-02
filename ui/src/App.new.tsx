@@ -5,13 +5,6 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { Line, Doughnut } from 'react-chartjs-2';
 import './App.css';
 
-// MetaMask type declarations
-declare global {
-  interface Window {
-    ethereum?: any;
-  }
-}
-
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
