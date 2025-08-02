@@ -86,8 +86,8 @@ function App() {
   const [toChain, setToChain] = useState('polkadot');
   const [fromToken, setFromToken] = useState('ETH');
   const [toToken, setToToken] = useState('DOT');
-  const [amount, setAmount] = useState('');
-  const [recipientAddress, setRecipientAddress] = useState('');
+  const [amount, setAmount] = useState('0.1');
+  const [recipientAddress, setRecipientAddress] = useState('5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY');
   const [slippage, setSlippage] = useState('0.5');
   const [deadline, setDeadline] = useState('20');
 
@@ -255,15 +255,19 @@ function App() {
   // Enhanced form validation
   const validateForm = () => {
     if (!amount || parseFloat(amount) <= 0) {
-      alert('Please enter a valid amount');
+      showToast('Please enter a valid amount', 'error');
       return false;
     }
     if (!recipientAddress) {
-      alert('Please enter a recipient address');
+      showToast('Please enter a recipient address', 'error');
+      return false;
+    }
+    if (!walletConnected) {
+      showToast('Please connect your wallet first', 'warning');
       return false;
     }
     if (fromChain === toChain) {
-      alert('Source and destination chains must be different');
+      showToast('Source and destination chains must be different', 'error');
       return false;
     }
     return true;
@@ -276,34 +280,36 @@ function App() {
 
     setLoadingStates(prev => ({ ...prev, swap: true }));
     try {
-      const secretHash = ethers.keccak256(ethers.toUtf8Bytes(`secret_${Date.now()}_${Math.random()}`));
-      
       const swapRequest = {
-        amount,
-        fromToken,
-        toToken,
         fromChain,
         toChain,
+        asset: fromToken,
+        amount,
+        maker: walletAddress,
         beneficiary: recipientAddress,
-        assetType: getAssetType(fromToken),
-        secretHash,
         timelock: Math.floor(Date.now() / 1000) + parseInt(deadline) * 60,
-        slippage: parseFloat(slippage)
+        slippage: parseFloat(slippage),
+        // Additional metadata
+        toToken,
+        assetType: getAssetType(fromToken)
       };
       
-      const response = await fetch('http://localhost:3002/api/initiate-swap', {
+      const response = await fetch('http://localhost:3002/initiate-swap', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(swapRequest)
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
       console.log('Swap initiated:', result);
-      setSwapData(result.swapDetails || result);
+      
+      setSwapData(result.swapData || result);
+      showToast('Swap initiated successfully! 🎉', 'success');
       setActiveTab('dashboard'); // Switch to dashboard to show progress
       
       // Fetch updated analytics with animation
@@ -312,7 +318,10 @@ function App() {
       
     } catch (error) {
       console.error('Swap initiation failed:', error);
-      alert('Failed to initiate swap. Please check your connection and try again.');
+      const errorMsg = typeof error === 'object' && error !== null && 'message' in error
+        ? (error as { message: string }).message
+        : String(error);
+      showToast(`Failed to initiate swap: ${errorMsg}`, 'error');
     } finally {
       setLoadingStates(prev => ({ ...prev, swap: false }));
     }
@@ -507,6 +516,7 @@ function App() {
               value={toToken}
               onChange={(e) => setToToken(e.target.value)}
               className="form-select"
+              title="Select destination token"
             >
               {TOKENS.filter(token => token.symbol !== 'ETH').map(token => (
                 <option key={token.symbol} value={token.symbol}>
