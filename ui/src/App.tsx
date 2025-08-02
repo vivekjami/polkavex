@@ -46,13 +46,24 @@ interface AnalyticsData {
   recentSwaps: SwapData[];
 }
 
-// Available tokens for swapping
+// Available tokens for swapping with asset type classification
 const TOKENS = [
-  { symbol: 'ETH', name: 'Ethereum', icon: '⚡' },
-  { symbol: 'USDC', name: 'USD Coin', icon: '💲' },
-  { symbol: 'DAI', name: 'Dai Stablecoin', icon: '🪙' },
-  { symbol: 'DOT', name: 'Polkadot', icon: '🔴' },
-  { symbol: 'ACA', name: 'Acala', icon: '🌊' }
+  { symbol: 'ETH', name: 'Ethereum', icon: '⚡', type: 'native', address: '0x0' },
+  { symbol: 'USDC', name: 'USD Coin', icon: '💲', type: 'stablecoin', address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238' },
+  { symbol: 'USDT', name: 'Tether USD', icon: '💰', type: 'stablecoin', address: '0x7169D38820dfd117C3FA1f22a697dBA58d90BA06' },
+  { symbol: 'DAI', name: 'Dai Stablecoin', icon: '🪙', type: 'stablecoin', address: '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357' },
+  { symbol: 'DOT', name: 'Polkadot', icon: '🔴', type: 'native', address: '0x0' },
+  { symbol: 'ACA', name: 'Acala', icon: '🌊', type: 'token', address: '0x0' },
+  { symbol: 'NFT', name: 'NFT Collection', icon: '🎨', type: 'nft', address: '0x0' }
+];
+
+// Asset type definitions for enhanced UI
+const ASSET_TYPES = [
+  { id: 'all', name: 'All Assets', icon: '🌐' },
+  { id: 'native', name: 'Native Tokens', icon: '⚡' },
+  { id: 'stablecoin', name: 'Stablecoins', icon: '💲' },
+  { id: 'token', name: 'ERC-20 Tokens', icon: '🪙' },
+  { id: 'nft', name: 'NFTs', icon: '🎨' }
 ];
 
 // Available chains
