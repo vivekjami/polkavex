@@ -568,6 +568,7 @@ body {
   cursor: pointer;
   font-weight: 600;
   color: #667eea;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -893,6 +894,7 @@ body {
   cursor: pointer;
   font-weight: 600;
   color: #667eea;
+  -webkit-user-select: none;
   user-select: none;
 }
 

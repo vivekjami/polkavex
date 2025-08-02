@@ -1207,3 +1207,163 @@ body::before {
   font-size: 0.75rem;
   opacity: 0.8;
 }
+
+/* AI Route and Progress Enhancement Styles */
+.ai-route-info {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+}
+
+.route-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: white;
+}
+
+.route-icon {
+  font-size: 1.2em;
+}
+
+.confidence-badge {
+  margin-left: auto;
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.route-reason {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-2);
+  line-height: 1.4;
+}
+
+.route-details {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.progress-steps-detailed {
+  margin: var(--space-4) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.progress-step.completed {
+  background: rgba(34, 197, 94, 0.1);
+  border-left: 3px solid #22c55e;
+}
+
+.progress-step.pending {
+  background: rgba(156, 163, 175, 0.1);
+  border-left: 3px solid #9ca3af;
+}
+
+.step-indicator {
+  font-size: 1.2em;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-title {
+  color: white;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.step-time {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.partial-fill-info {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+}
+
+.fill-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: white;
+}
+
+.fill-icon {
+  font-size: 1.2em;
+}
+
+.fill-details {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.fill-recommendation {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.75rem;
+  font-style: italic;
+}
+
+.progress-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary {
+  background: rgba(156, 163, 175, 0.2);
+  color: white;
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(156, 163, 175, 0.3);
+  border-color: rgba(156, 163, 175, 0.5);
+}
+
+.btn-outline {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}

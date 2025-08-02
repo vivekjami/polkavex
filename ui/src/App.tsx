@@ -35,6 +35,18 @@ interface SwapData {
     parachain: string;
     reason: string;
   };
+  aiRoute?: {
+    parachain: string;
+    reason: string;
+    confidence?: number;
+    estimatedGas?: string;
+  };
+  partialFillInfo?: {
+    fillPercentage: string;
+    remainingAmount: string;
+    recommendation: string;
+  };
+  secretHash?: string;
 }
 
 interface AnalyticsData {
@@ -55,23 +67,6 @@ const TOKENS = [
   { symbol: 'DOT', name: 'Polkadot', icon: '🔴', type: 'native', address: '0x0' },
   { symbol: 'ACA', name: 'Acala', icon: '🌊', type: 'token', address: '0x0' },
   { symbol: 'NFT', name: 'NFT Collection', icon: '🎨', type: 'nft', address: '0x0' }
-];
-
-// Asset type definitions for enhanced UI
-const ASSET_TYPES = [
-  { id: 'all', name: 'All Assets', icon: '🌐' },
-  { id: 'native', name: 'Native Tokens', icon: '⚡' },
-  { id: 'stablecoin', name: 'Stablecoins', icon: '💲' },
-  { id: 'token', name: 'ERC-20 Tokens', icon: '🪙' },
-  { id: 'nft', name: 'NFTs', icon: '🎨' }
-];
-
-// Available chains
-const CHAINS = [
-  { id: 'ethereum', name: 'Ethereum', icon: '⚡', color: '#627eea' },
-  { id: 'polkadot', name: 'Polkadot', icon: '🔴', color: '#e6007a' },
-  { id: 'acala', name: 'Acala', icon: '🌊', color: '#ff4081' },
-  { id: 'moonbeam', name: 'Moonbeam', icon: '🌙', color: '#53cbc8' }
 ];
 
 function App() {
@@ -183,15 +178,6 @@ function App() {
     connection: false,
     quote: false
   });
-
-  // Animation states
-  const [animationStates, setAnimationStates] = useState({
-    headerLoaded: false,
-    metricsLoaded: false
-  });
-
-  // Connection states
-  const [isConnected, setIsConnected] = useState(false);
 
   // Toast notifications
   const [toast, setToast] = useState<{
@@ -308,12 +294,35 @@ function App() {
       const result = await response.json();
       console.log('Swap initiated:', result);
       
-      setSwapData(result.swapData || result);
-      showToast('Swap initiated successfully! 🎉', 'success');
+      // Enhanced swap data handling
+      const enhancedSwapData = {
+        swapId: result.swapId,
+        status: 'initiated',
+        amount,
+        token: fromToken,
+        targetToken: toToken,
+        sourceChain: fromChain,
+        targetChain: toChain,
+        createdAt: new Date().toISOString(),
+        secretHash: result.secretHash,
+        aiRoute: result.aiRoute,
+        partialFillInfo: result.partialFillInfo,
+        estimatedGas: result.aiRoute?.estimatedGas || '~0.1 DOT',
+        estimatedTime: '~5-10s',
+        progress: [
+          { step: 'Initiated', status: 'completed', timestamp: new Date().toISOString() },
+          { step: 'AI Route Selection', status: 'completed', timestamp: new Date().toISOString() },
+          { step: 'Smart Contract Deploy', status: 'pending', timestamp: null },
+          { step: 'Cross-Chain Transfer', status: 'pending', timestamp: null },
+          { step: 'Completion', status: 'pending', timestamp: null }
+        ]
+      };
+      
+      setSwapData(enhancedSwapData);
+      showToast(`Swap initiated via ${result.aiRoute?.parachain}! 🚀`, 'success');
       setActiveTab('dashboard'); // Switch to dashboard to show progress
       
-      // Fetch updated analytics with animation
-      setAnimationStates(prev => ({ ...prev, metricsLoaded: true }));
+      // Fetch updated analytics
       await fetchAnalytics();
       
     } catch (error) {
@@ -377,8 +386,6 @@ function App() {
         });
       }
       
-      // Trigger metrics loaded animation
-      setAnimationStates(prev => ({ ...prev, metricsLoaded: true }));
     } catch (error) {
       console.log('Using mock data - services may be offline');
     } finally {
@@ -386,28 +393,18 @@ function App() {
     }
   };
 
-  // Check connection status with enhanced animations
+  // Check connection status
   useEffect(() => {
     const checkConnection = async () => {
-      try {
-        const response = await fetch('http://localhost:3002/health');
-        setIsConnected(response.ok);
-      } catch {
-        setIsConnected(false);
-      }
+      // Connection check can be done but we don't store the state
     };
-
-    // Trigger initial animations
-    setTimeout(() => {
-      setAnimationStates(prev => ({ ...prev, headerLoaded: true }));
-    }, 100);
 
     checkConnection();
     const interval = setInterval(checkConnection, 10000);
     
     // Socket event listeners
-    socket.on('connect', () => setIsConnected(true));
-    socket.on('disconnect', () => setIsConnected(false));
+    socket.on('connect', () => console.log('Socket connected'));
+    socket.on('disconnect', () => console.log('Socket disconnected'));
     socket.on('swap-update', (data) => {
       if (swapData && data.swapId === swapData.swapId) {
         setSwapData({ ...swapData, ...data });
@@ -627,16 +624,106 @@ function App() {
               <div className="progress-description">
                 Swap ID: {swapData.swapId}
               </div>
+              
+              {/* AI Route Information */}
+              {swapData.aiRoute && (
+                <div className="ai-route-info">
+                  <div className="route-header">
+                    <span className="route-icon">🤖</span>
+                    <span>AI-Selected Route: <strong>{swapData.aiRoute.parachain}</strong></span>
+                    <span className="confidence-badge">
+                      {Math.round((swapData.aiRoute.confidence || 0.75) * 100)}% confidence
+                    </span>
+                  </div>
+                  <div className="route-reason">
+                    {swapData.aiRoute.reason?.includes('Moonbeam') 
+                      ? "Moonbeam selected for optimal EVM compatibility and gas efficiency"
+                      : swapData.aiRoute.reason || "Optimized for your transaction requirements"
+                    }
+                  </div>
+                  <div className="route-details">
+                    <span>Gas: {swapData.aiRoute.estimatedGas}</span>
+                    <span>•</span>
+                    <span>Time: {swapData.estimatedTime}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Steps */}
+              {swapData.progress && (
+                <div className="progress-steps-detailed">
+                  {swapData.progress.map((step, index) => (
+                    <div key={index} className={`progress-step ${step.status}`}>
+                      <div className="step-indicator">
+                        {step.status === 'completed' ? '✅' : 
+                         step.status === 'pending' ? '⏳' : '🔄'}
+                      </div>
+                      <div className="step-content">
+                        <div className="step-title">{step.step}</div>
+                        {step.timestamp && (
+                          <div className="step-time">
+                            {new Date(step.timestamp).toLocaleTimeString()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Partial Fill Information */}
+              {swapData.partialFillInfo && (
+                <div className="partial-fill-info">
+                  <div className="fill-header">
+                    <span className="fill-icon">⚡</span>
+                    <span>Partial Fill Available</span>
+                  </div>
+                  <div className="fill-details">
+                    <div>Fill: {swapData.partialFillInfo.fillPercentage}</div>
+                    <div>Remaining: {swapData.partialFillInfo.remainingAmount} {swapData.token}</div>
+                  </div>
+                  <div className="fill-recommendation">
+                    {swapData.partialFillInfo.recommendation}
+                  </div>
+                </div>
+              )}
+
               <div className="progress-bar progress-bar-margin">
                 <div 
                   className="progress-fill" 
                   style={{ 
-                    width: swapData.status === 'completed' ? '100%' : '60%'
+                    width: swapData.status === 'completed' ? '100%' : 
+                           swapData.status === 'initiated' ? '25%' : '60%'
                   }}
                 ></div>
               </div>
               <div className="progress-steps">
-                Status: {swapData.status === 'completed' ? '✅ Completed' : '⏳ Processing'}
+                Status: {swapData.status === 'completed' ? '✅ Completed' : 
+                         swapData.status === 'initiated' ? '🚀 Initiated' : '⏳ Processing'}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="progress-actions">
+                <button 
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setSwapData(null);
+                    setActiveTab('swap');
+                  }}
+                >
+                  ← New Swap
+                </button>
+                {swapData.secretHash && (
+                  <button 
+                    className="btn btn-outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(swapData.secretHash || '');
+                      showToast('Secret hash copied to clipboard!', 'success');
+                    }}
+                  >
+                    📋 Copy Hash
+                  </button>
+                )}
               </div>
             </div>
           </div>
