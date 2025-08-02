@@ -3,6 +3,7 @@ const { ethers } = require('ethers');
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const WebSocket = require('ws');
+const OneInchService = require('./services/oneinch');
 require('dotenv').config();
 
 const app = express();
@@ -11,6 +12,9 @@ const PORT = process.env.PORT || 3002;
 // Initialize AI service
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' });
+
+// Initialize 1inch service
+const oneInchService = new OneInchService(process.env.ONEINCH_API_KEY, 1); // Ethereum mainnet
 
 // Blockchain connections
 let ethProvider;
@@ -29,12 +33,17 @@ app.get('/health', async (req, res) => {
         const ethStatus = ethProvider ? 'connected' : 'disconnected';
         const polkadotStatus = polkadotApi && polkadotApi.isConnected ? 'connected' : 'disconnected';
         
+        // Check 1inch API status
+        const oneInchStatus = await oneInchService.healthCheck();
+        
         res.json({ 
             status: 'ok', 
             timestamp: new Date().toISOString(),
             service: 'Polkavex Relayer',
             ethereum: ethStatus,
             polkadot: polkadotStatus,
+            oneinch: oneInchStatus.status,
+            oneInchDetails: oneInchStatus,
             activeSwaps: activeSwaps.size,
             totalSwaps: swapHistory.length
         });
@@ -120,21 +129,52 @@ app.post('/suggest-route', async (req, res) => {
     }
 });
 
-// Day 3: Enhanced AI routing with Gemini
+// Day 3: Enhanced AI routing with Gemini and 1inch integration
 async function getAiRouting(asset, amount, fromChain = 'ethereum', toChain = 'polkadot') {
     try {
         const assetInfo = detectAssetType(asset);
         
-        const prompt = `As a DeFi routing expert, suggest the best Polkadot parachain for swapping ${assetInfo.type} token with amount ${amount}. Consider factors like:
-        - Liquidity depth
-        - Transaction fees  
-        - Speed of execution
-        - Yield opportunities
-        - Cross-chain compatibility
+        // Get 1inch quote for comparison if dealing with Ethereum
+        let oneInchData = null;
+        if (fromChain === 'ethereum' && process.env.ONEINCH_API_KEY) {
+            try {
+                // For demo purposes, use USDC as destination for 1inch comparison
+                const usdcAddress = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+                if (asset !== usdcAddress) {
+                    const quote = await oneInchService.getSwapQuote(asset, usdcAddress, amount);
+                    if (quote.success) {
+                        oneInchData = {
+                            available: true,
+                            estimatedOutput: quote.data.dstAmount,
+                            gasCost: quote.estimatedGas,
+                            protocols: quote.protocols.length
+                        };
+                    }
+                }
+            } catch (error) {
+                console.log('1inch data unavailable for routing decision');
+            }
+        }
+
+        const prompt = `As a DeFi routing expert, suggest the best Polkadot parachain for swapping ${assetInfo.type} token with amount ${amount}. 
+
+Available data:
+- Asset type: ${assetInfo.type}
+- Is stablecoin: ${assetInfo.isStablecoin}
+- Is NFT: ${assetInfo.isNFT}
+- 1inch availability: ${oneInchData ? 'Available with ' + oneInchData.protocols + ' protocols' : 'Not available'}
+
+Consider factors like:
+- Liquidity depth
+- Transaction fees  
+- Speed of execution
+- Yield opportunities
+- Cross-chain compatibility
+- 1inch vs parachain benefits
+
+Focus on these parachains: Acala (DeFi hub), Moonbeam (EVM compatible), Astar (dApp platform), Hydration (AMM), Centrifuge (RWA).
         
-        Focus on these parachains: Acala (DeFi hub), Moonbeam (EVM compatible), Astar (dApp platform), Hydration (AMM), Centrifuge (RWA).
-        
-        Provide a JSON response with: parachain, reason, estimatedGas.`;
+Provide a JSON response with: parachain, reason, estimatedGas, oneInchComparison.`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -142,39 +182,27 @@ async function getAiRouting(asset, amount, fromChain = 'ethereum', toChain = 'po
         
         // Try to parse as JSON, fallback to structured response
         try {
-            return JSON.parse(text);
+            const parsed = JSON.parse(text);
+            return {
+                ...parsed,
+                oneInchData,
+                confidence: 0.85,
+                source: 'AI + 1inch'
+            };
         } catch {
             return {
                 parachain: assetInfo.isStablecoin ? 'Acala' : 'Moonbeam',
                 reason: text.substring(0, 200) + '...',
-                estimatedGas: '0.1 DOT'
+                estimatedGas: '0.1 DOT',
+                oneInchData,
+                confidence: 0.75,
+                source: 'AI fallback'
             };
         }
         
     } catch (error) {
         console.error('AI routing error:', error);
-        // Fallback routing logic
-        const assetInfo = detectAssetType(asset);
-        
-        if (assetInfo.isStablecoin) {
-            return {
-                parachain: 'Acala',
-                reason: `Acala provides the best stablecoin liquidity for ${assetInfo.type} with integrated DeFi protocols`,
-                estimatedGas: '0.05 DOT'
-            };
-        } else if (assetInfo.isNFT) {
-            return {
-                parachain: 'Moonbeam',
-                reason: 'Moonbeam offers the most robust NFT infrastructure with EVM compatibility',
-                estimatedGas: '0.2 DOT'
-            };
-        } else {
-            return {
-                parachain: 'Astar',
-                reason: 'Astar provides optimal routing for general token swaps with low fees',
-                estimatedGas: '0.1 DOT'
-            };
-        }
+        return await fallbackAiRouting(asset);
     }
 }
 
@@ -326,27 +354,44 @@ async function resolveEscrow(escrowId, secret, assetInfo) {
     }
 }
 
-// Fallback AI routing function
+// Fallback AI routing function with 1inch awareness
 async function fallbackAiRouting(asset) {
     const assetInfo = detectAssetType(asset);
+    
+    // Check 1inch availability for context
+    let oneInchAvailable = false;
+    if (process.env.ONEINCH_API_KEY) {
+        try {
+            const healthCheck = await oneInchService.healthCheck();
+            oneInchAvailable = healthCheck.status === 'connected';
+        } catch (error) {
+            oneInchAvailable = false;
+        }
+    }
     
     if (assetInfo.isStablecoin) {
         return {
             parachain: 'Acala',
-            reason: `Acala provides the best stablecoin liquidity for ${assetInfo.type} with integrated DeFi protocols`,
-            estimatedGas: '0.05 DOT'
+            reason: `Acala provides optimal stablecoin liquidity for ${assetInfo.type}. ${oneInchAvailable ? '1inch available as alternative.' : 'Cross-chain preferred for yield opportunities.'}`,
+            estimatedGas: '0.05 DOT',
+            oneInchAlternative: oneInchAvailable,
+            source: 'fallback + 1inch check'
         };
     } else if (assetInfo.isNFT) {
         return {
             parachain: 'Moonbeam',
             reason: 'Moonbeam offers the most robust NFT infrastructure with EVM compatibility',
-            estimatedGas: '0.2 DOT'
+            estimatedGas: '0.2 DOT',
+            oneInchAlternative: false, // 1inch doesn't handle NFTs well
+            source: 'fallback'
         };
     } else {
         return {
             parachain: 'Astar',
-            reason: 'Astar provides optimal routing for general token swaps with low fees',
-            estimatedGas: '0.1 DOT'
+            reason: `Astar provides optimal routing for general token swaps. ${oneInchAvailable ? 'Consider 1inch for immediate execution.' : ''}`,
+            estimatedGas: '0.1 DOT',
+            oneInchAlternative: oneInchAvailable,
+            source: 'fallback + 1inch check'
         };
     }
 }
@@ -382,6 +427,97 @@ async function initializeConnections() {
         console.error('Failed to initialize connections:', error.message);
     }
 }
+
+// 1inch Integration: Get price quote
+app.post('/api/1inch/quote', async (req, res) => {
+    try {
+        const { fromToken, toToken, amount, slippage } = req.body;
+        
+        if (!fromToken || !toToken || !amount) {
+            return res.status(400).json({ error: 'Missing required parameters: fromToken, toToken, amount' });
+        }
+
+        const quote = await oneInchService.getSwapQuote(fromToken, toToken, amount, slippage);
+        
+        if (quote.success) {
+            res.json({
+                success: true,
+                quote: quote.data,
+                estimatedGas: quote.estimatedGas,
+                minReturn: quote.minReturn,
+                protocols: quote.protocols,
+                source: '1inch'
+            });
+        } else {
+            res.json({
+                success: false,
+                error: quote.error,
+                fallback: 'Using cross-chain routing instead'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 1inch Integration: Get optimized route (1inch vs cross-chain)
+app.post('/api/1inch/optimize-route', async (req, res) => {
+    try {
+        const { fromToken, toToken, amount, userPreference } = req.body;
+        
+        if (!fromToken || !toToken || !amount) {
+            return res.status(400).json({ error: 'Missing required parameters' });
+        }
+
+        const optimization = await oneInchService.getOptimizedRoute(
+            fromToken, 
+            toToken, 
+            amount, 
+            userPreference || 'best_price'
+        );
+        
+        res.json(optimization);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 1inch Integration: Create Fusion+ order
+app.post('/api/1inch/fusion-order', async (req, res) => {
+    try {
+        const orderData = req.body;
+        
+        const fusionOrder = await oneInchService.createFusionOrder(orderData);
+        
+        if (fusionOrder.success) {
+            res.json({
+                success: true,
+                order: fusionOrder.order,
+                orderHash: fusionOrder.orderHash,
+                message: 'Fusion+ order ready for cross-chain execution'
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                error: fusionOrder.error
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 1inch Integration: Check token liquidity
+app.post('/api/1inch/liquidity', async (req, res) => {
+    try {
+        const { fromToken, toToken, amount } = req.body;
+        
+        const liquidity = await oneInchService.checkLiquidity(fromToken, toToken, amount);
+        res.json(liquidity);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 app.listen(PORT, async () => {
     console.log(`🚀 Polkavex Relayer running on port ${PORT}`);
