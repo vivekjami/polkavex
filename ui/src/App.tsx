@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ethers } from 'ethers';
 import io from 'socket.io-client';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement, BarElement } from 'chart.js';
@@ -81,7 +81,7 @@ function App() {
   const [toChain, setToChain] = useState('polkadot');
   const [fromToken, setFromToken] = useState('ETH');
   const [toToken, setToToken] = useState('DOT');
-  const [amount, setAmount] = useState('0.1');
+  const [amount, setAmount] = useState('0.01'); // Smaller default amount for realistic testing
   const [recipientAddress, setRecipientAddress] = useState('5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY');
   const [slippage, setSlippage] = useState('0.5');
   const [deadline, setDeadline] = useState('20');
@@ -198,6 +198,107 @@ function App() {
     return tokenData?.type || 'token';
   };
 
+  // Helper function to get appropriate recipient address placeholder
+  const getRecipientPlaceholder = () => {
+    if (toChain === 'polkadot' || toToken === 'DOT') {
+      return '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
+    } else {
+      return '0x742d35Cc6aF1C6B6B7b7b1C8f3D2f4e5b1A2C9D8E0F1';
+    }
+  };
+
+  // Helper function to suggest recipient address based on target chain
+  const getSuggestedRecipientAddress = useCallback(() => {
+    if (toChain === 'polkadot' || toToken === 'DOT') {
+      // For DOT/Polkadot, suggest a sample Polkadot address
+      return '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
+    } else {
+      // For Ethereum-based tokens, use wallet address if available
+      return walletAddress || '';
+    }
+  }, [toChain, toToken, walletAddress]);
+
+  // Helper function to calculate estimated conversion
+  const getEstimatedAmount = () => {
+    if (!amount || parseFloat(amount) <= 0) return '0.00';
+    
+    const inputAmount = parseFloat(amount);
+    
+    // Current market conversion rates (as of August 2025)
+    const conversionRates: { [key: string]: { [key: string]: number } } = {
+      'ETH': {
+        'DOT': 968.86, // 1 ETH = 968.86 DOT (current market rate)
+        'USDC': 3200, // 1 ETH = 3200 USDC
+        'USDT': 3200,
+        'DAI': 3200,
+        'ACA': 1500,
+        'NFT': 0.1
+      },
+      'DOT': {
+        'ETH': 0.001032, // 1 DOT = 0.001032 ETH (1/968.86)
+        'USDC': 3.3, // 1 DOT ≈ 3.3 USDC
+        'USDT': 3.3,
+        'DAI': 3.3,
+        'ACA': 1.55,
+        'NFT': 0.0001
+      },
+      'USDC': {
+        'ETH': 0.0003125, // 1 USDC = 0.0003125 ETH
+        'DOT': 0.303, // 1 USDC = 0.303 DOT
+        'USDT': 1,
+        'DAI': 1,
+        'ACA': 0.47,
+        'NFT': 0.00003
+      },
+      'USDT': {
+        'ETH': 0.0003125,
+        'DOT': 0.303,
+        'USDC': 1,
+        'DAI': 1,
+        'ACA': 0.47,
+        'NFT': 0.00003
+      },
+      'DAI': {
+        'ETH': 0.0003125,
+        'DOT': 0.303,
+        'USDC': 1,
+        'USDT': 1,
+        'ACA': 0.47,
+        'NFT': 0.00003
+      },
+      'ACA': {
+        'ETH': 0.000667,
+        'DOT': 0.645,
+        'USDC': 2.13,
+        'USDT': 2.13,
+        'DAI': 2.13,
+        'NFT': 0.000067
+      },
+      'NFT': {
+        'ETH': 10, // 1 NFT = 10 ETH (example rate)
+        'DOT': 9688.6,
+        'USDC': 32000,
+        'USDT': 32000,
+        'DAI': 32000,
+        'ACA': 15000
+      }
+    };
+
+    const rate = conversionRates[fromToken]?.[toToken] || 1;
+    const estimatedAmount = inputAmount * rate;
+    
+    // Format based on token type for better readability
+    if (toToken === 'DOT' && estimatedAmount > 100) {
+      return estimatedAmount.toFixed(2); // Show 2 decimals for large DOT amounts
+    } else if (toToken === 'ETH' && estimatedAmount < 1) {
+      return estimatedAmount.toFixed(6); // Show 6 decimals for small ETH amounts
+    } else if (['USDC', 'USDT', 'DAI'].includes(toToken)) {
+      return estimatedAmount.toFixed(2); // Show 2 decimals for stablecoins
+    }
+    
+    return estimatedAmount.toFixed(4);
+  };
+
   // Connect to MetaMask wallet with enhanced loading
   const connectWallet = async () => {
     if (typeof window.ethereum !== 'undefined') {
@@ -211,9 +312,9 @@ function App() {
         setWalletAddress(accounts[0]);
         setWalletBalance(ethers.formatEther(balance));
         
-        // Auto-fill recipient if empty
+        // Auto-fill recipient with appropriate address based on target chain
         if (!recipientAddress) {
-          setRecipientAddress(accounts[0]);
+          setRecipientAddress(getSuggestedRecipientAddress());
         }
 
         showToast('Wallet connected successfully!', 'success');
@@ -236,6 +337,9 @@ function App() {
     setFromToken(toToken);
     setToChain(tempFromChain);
     setToToken(tempFromToken);
+    
+    // Update recipient address to match the new target chain
+    setRecipientAddress(getSuggestedRecipientAddress());
   };
 
   // Enhanced form validation
@@ -433,6 +537,15 @@ function App() {
     }
   }, [activeTab]);
 
+  // Update recipient address when target chain/token changes
+  useEffect(() => {
+    if (walletConnected && !recipientAddress) {
+      setRecipientAddress(getSuggestedRecipientAddress());
+    }
+    // ESLint disabled: recipientAddress intentionally excluded to prevent infinite loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toChain, toToken, walletConnected, walletAddress, getSuggestedRecipientAddress]);
+
   const renderSwapInterface = () => (
     <div className="swap-container">
       <div className="swap-header">
@@ -483,7 +596,7 @@ function App() {
               className="form-select"
               title="Select source token"
             >
-              {TOKENS.filter(token => token.symbol !== 'DOT').map(token => (
+              {TOKENS.map(token => (
                 <option key={token.symbol} value={token.symbol}>
                   {token.icon} {token.symbol}
                 </option>
@@ -500,11 +613,11 @@ function App() {
         {/* To Token Section */}
         <div className="form-group">
           <label className="form-label">To</label>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--space-3)' }}>
+          <div className="swap-form-grid">
             <input
               type="text"
               placeholder="0.00"
-              value={amount} // In a real app, this would be calculated
+              value={getEstimatedAmount()}
               className="form-input"
               readOnly
               title="Estimated amount to receive"
@@ -515,26 +628,48 @@ function App() {
               className="form-select"
               title="Select destination token"
             >
-              {TOKENS.filter(token => token.symbol !== 'ETH').map(token => (
+              {TOKENS.map(token => (
                 <option key={token.symbol} value={token.symbol}>
                   {token.icon} {token.symbol}
                 </option>
               ))}
             </select>
           </div>
+          <div className="amount-display">
+            {fromToken && toToken && fromToken !== toToken && (
+              <span>Rate: 1 {fromToken} ≈ {getEstimatedAmount() !== '0.00' ? 
+                (parseFloat(getEstimatedAmount()) / parseFloat(amount || '1')).toFixed(6) : 
+                '~'} {toToken}</span>
+            )}
+          </div>
         </div>
 
         {/* Recipient Address */}
         <div className="form-group">
           <label className="form-label">Recipient Address</label>
-          <input
-            type="text"
-            placeholder="5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
-            value={recipientAddress}
-            onChange={(e) => setRecipientAddress(e.target.value)}
-            className="form-input"
-            title="Enter the recipient address on the destination chain"
-          />
+          <div className="input-with-button">
+            <input
+              type="text"
+              placeholder={getRecipientPlaceholder()}
+              value={recipientAddress}
+              onChange={(e) => setRecipientAddress(e.target.value)}
+              className="form-input"
+              title="Enter the recipient address on the destination chain"
+            />
+            <button
+              type="button"
+              onClick={() => setRecipientAddress(getSuggestedRecipientAddress())}
+              className="btn btn-secondary-small"
+              title="Fill with suggested address"
+            >
+              📋
+            </button>
+          </div>
+          <div className="form-hint">
+            {toChain === 'polkadot' || toToken === 'DOT' 
+              ? '📍 Polkadot address (starts with 1, 5, or other)' 
+              : '📍 Ethereum address (starts with 0x)'}
+          </div>
         </div>
 
         {/* Advanced Settings */}
@@ -735,11 +870,11 @@ function App() {
   const renderDashboard = () => (
     <div>
       {/* Dashboard Header */}
-      <div style={{ textAlign: 'center', marginBottom: 'var(--space-8)', color: 'white' }}>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: 'var(--space-2)' }}>
+      <div className="welcome-header">
+        <h1 className="welcome-title">
           📊 Analytics Dashboard
         </h1>
-        <p style={{ fontSize: '1.125rem', opacity: 0.9 }}>
+        <p className="welcome-subtitle">
           Real-time insights and cross-chain swap analytics
         </p>
       </div>
@@ -768,10 +903,10 @@ function App() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-2" style={{ marginTop: 'var(--space-8)' }}>
+      <div className="grid grid-2 analytics-grid">
         {/* Asset Distribution Chart */}
         <div className="glass-card">
-          <h3 style={{ color: 'white', marginBottom: 'var(--space-6)', fontSize: '1.25rem', fontWeight: 600 }}>
+          <h3 className="analytics-section-title">
             🎯 Asset Distribution
           </h3>
           <div className="chart-container">
@@ -816,7 +951,7 @@ function App() {
 
         {/* Volume Over Time Chart */}
         <div className="glass-card">
-          <h3 style={{ color: 'white', marginBottom: 'var(--space-6)', fontSize: '1.25rem', fontWeight: 600 }}>
+          <h3 className="analytics-section-title">
             📈 Volume Trends
           </h3>
           <div className="chart-container">
@@ -857,12 +992,12 @@ function App() {
       </div>
 
       {/* Recent Swaps */}
-      <div className="glass-card" style={{ marginTop: 'var(--space-8)' }}>
-        <h3 style={{ color: 'white', marginBottom: 'var(--space-6)', fontSize: '1.25rem', fontWeight: 600 }}>
+      <div className="glass-card recent-swaps-section">
+        <h3 className="analytics-section-title">
           🕒 Recent Swaps
         </h3>
         
-        <div style={{ overflow: 'hidden' }}>
+        <div className="chart-overflow">
           {analytics.recentSwaps.map((swap, index) => (
             <div 
               key={index} 
