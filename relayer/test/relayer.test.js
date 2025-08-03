@@ -2,6 +2,9 @@ const chai = require('chai');
 const { expect } = chai;
 const fetch = require('node-fetch');
 
+// Import our actual relayer functions for Day 5 testing
+const { getAiRouting, detectAssetType, resolveEscrow } = require('../index');
+
 // Mock relayer functions for testing
 const mockRelayerFunctions = {
   getAiRouting: async (token) => {
@@ -280,3 +283,101 @@ describe('🔗 Relayer API Integration Tests', function() {
 });
 
 console.log('🎯 Day 5 Test Suite: Enhanced NFT/Stablecoin support with 80%+ coverage target');
+
+// Day 5 Enhanced Security & Feature Tests
+describe('Day 5 Enhanced Security & Features', () => {
+  
+  describe('Real Asset Type Detection', () => {
+    it('should detect USDC stablecoin correctly', () => {
+      const result = detectAssetType('0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238');
+      expect(result.type).to.equal('USDC');
+      expect(result.isStablecoin).to.be.true;
+    });
+
+    it('should detect ETH correctly', () => {
+      const result = detectAssetType('0x0000000000000000000000000000000000000000');
+      expect(result.type).to.equal('ETH');
+      expect(result.isStablecoin).to.be.false;
+    });
+
+    it('should handle unknown tokens as ERC20', () => {
+      const result = detectAssetType('0x1234567890123456789012345678901234567890');
+      expect(result.type).to.equal('ERC20');
+      expect(result.isNFT).to.be.false;
+    });
+  });
+
+  describe('Real AI Routing', () => {
+    it('should provide stablecoin-optimized routing', async () => {
+      const route = await getAiRouting('0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', '1000');
+      expect(route.parachain).to.equal('Acala');
+      expect(route.reason).to.include('stablecoin');
+      expect(route.confidence).to.be.above(0.9);
+    });
+
+    it('should provide NFT-optimized routing', async () => {
+      // This would be enhanced once NFT detection is fully implemented
+      const route = await getAiRouting('nft_mock', '1');
+      expect(route.parachain).to.be.a('string');
+      expect(route.estimatedTime).to.be.a('string');
+    });
+  });
+
+  describe('Escrow Resolution Security', () => {
+    it('should resolve stablecoin escrows with proper metadata', async () => {
+      const assetInfo = { type: 'USDC', isNFT: false, isStablecoin: true };
+      const result = await resolveEscrow('test-123', 'secret', assetInfo);
+      expect(result.success).to.be.true;
+      expect(result.type).to.equal('STABLECOIN');
+      expect(result.token).to.equal('USDC');
+    });
+
+    it('should handle NFT escrows with tokenId tracking', async () => {
+      const assetInfo = { type: 'NFT', isNFT: true, isStablecoin: false, tokenId: '42' };
+      const result = await resolveEscrow('nft-test', 'nft-secret', assetInfo);
+      expect(result.success).to.be.true;
+      expect(result.type).to.equal('NFT');
+      expect(result.tokenId).to.equal('42');
+    });
+  });
+
+  describe('Security Edge Cases', () => {
+    it('should handle malformed asset addresses', () => {
+      const result = detectAssetType('invalid-address');
+      expect(result.type).to.equal('ERC20'); // Safe fallback
+    });
+
+    it('should handle null inputs gracefully', () => {
+      const result = detectAssetType(null);
+      expect(result.type).to.equal('ETH'); // Safe default
+    });
+
+    it('should validate routing confidence levels', async () => {
+      const route = await getAiRouting('0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', '1000');
+      expect(route.confidence).to.be.a('number');
+      expect(route.confidence).to.be.within(0, 1);
+    });
+  });
+
+  describe('Performance & Load Testing', () => {
+    it('should handle 50+ concurrent asset detections', () => {
+      const promises = [];
+      for (let i = 0; i < 50; i++) {
+        promises.push(Promise.resolve(detectAssetType('0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238')));
+      }
+      return Promise.all(promises).then(results => {
+        expect(results).to.have.length(50);
+        results.forEach(result => {
+          expect(result.type).to.equal('USDC');
+        });
+      });
+    });
+
+    it('should complete routing calculations quickly', async () => {
+      const start = Date.now();
+      await getAiRouting('0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', '1000');
+      const duration = Date.now() - start;
+      expect(duration).to.be.below(1000); // Should complete in <1 second
+    });
+  });
+});

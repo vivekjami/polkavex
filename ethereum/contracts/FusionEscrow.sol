@@ -55,6 +55,11 @@ contract FusionEscrow is Ownable, ReentrancyGuard {
     // Known stablecoin addresses for enhanced routing
     mapping(address => bool) public knownStablecoins;
     
+    // Known stablecoin addresses (Sepolia testnet)
+    address public constant USDC_SEPOLIA = 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238;
+    address public constant USDT_SEPOLIA = 0x7169D38820dfd117C3FA1f22a697dBA58d90BA06;
+    address public constant DAI_SEPOLIA = 0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357;
+    
     // Events for comprehensive on-chain tracking
     event EscrowCreated(
         uint256 indexed escrowId, 
@@ -113,24 +118,29 @@ contract FusionEscrow is Ownable, ReentrancyGuard {
     
     /**
      * @dev Check if an asset is a known stablecoin
-     * @param asset Address to check
-     * @return true if the asset is a registered stablecoin
+     * @param asset The asset address to check
+     * @return bool True if the asset is a known stablecoin
      */
-    function isStablecoin(address asset) public view returns (bool) {
-        // Check our registry first
-        if (knownStablecoins[asset]) {
-            return true;
-        }
-        
-        // Hardcoded check for major stablecoins (mainnet addresses)
-        // USDC mainnet: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-        // USDT mainnet: 0xdAC17F958D2ee523a2206206994597C13D831ec7
-        // DAI mainnet: 0x6B175474E89094C44Da98b954EedeAC495271d0F
-        return asset == 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48 || // USDC
-               asset == 0xdAC17F958D2ee523a2206206994597C13D831ec7 || // USDT
-               asset == 0x6B175474E89094C44Da98b954EedeAC495271d0F;   // DAI
+    function isStablecoin(address asset) public pure returns (bool) {
+        return asset == USDC_SEPOLIA || 
+               asset == USDT_SEPOLIA || 
+               asset == DAI_SEPOLIA;
     }
     
+    /**
+     * @dev Get stablecoin decimals for proper amount handling
+     * @param asset The stablecoin address
+     * @return uint8 The number of decimals for the stablecoin
+     */
+    function getStablecoinDecimals(address asset) public pure returns (uint8) {
+        if (asset == USDC_SEPOLIA || asset == USDT_SEPOLIA) {
+            return 6; // USDC and USDT use 6 decimals
+        } else if (asset == DAI_SEPOLIA) {
+            return 18; // DAI uses 18 decimals
+        }
+        return 18; // Default fallback
+    }
+
     /**
      * @dev Enhanced asset validation with stablecoin detection
      * @param assetAddress Address of the asset

@@ -2,6 +2,35 @@
 # yarn lockfile v1
 
 
+"@1inch/byte-utils@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.npmjs.org/@1inch/byte-utils/-/byte-utils-3.1.0.tgz"
+  integrity sha512-fMxihTlLKvRvy3gvL16DTWkZGDwQXYSEgCLX/+sazb38+YD7IK3HzKaxvAUzg8ODLwQk5oY/o6pqRQKI+9x+OA==
+
+"@1inch/byte-utils@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.npmjs.org/@1inch/byte-utils/-/byte-utils-3.0.0.tgz"
+  integrity sha512-CuX4E0z/pzo9hKGzFsMi3vPVgHRRh14ZwNEZ5TY1svnKF8PjxWx3t0CjXCW4dyqKGe6TKAzgYqzzxrMrWPDy5Q==
+
+"@1inch/fusion-sdk@^2.3.6":
+  version "2.3.6"
+  resolved "https://registry.npmjs.org/@1inch/fusion-sdk/-/fusion-sdk-2.3.6.tgz"
+  integrity sha512-yGhtzlDoUv45lyF4K7Mwsoe5XydA33Yzs7M/A6fY10GpP7HPVirbXVCOISc5HS5cK1k95YxBFszdTABtTSc4tg==
+  dependencies:
+    "@1inch/byte-utils" "^3.1.0"
+    "@1inch/limit-order-sdk" "5.0.4-rc.0"
+    ethers "^6.14.1"
+    tslib "^2.8.1"
+    ws "^8.18.2"
+
+"@1inch/limit-order-sdk@5.0.4-rc.0":
+  version "5.0.4-rc.0"
+  resolved "https://registry.npmjs.org/@1inch/limit-order-sdk/-/limit-order-sdk-5.0.4-rc.0.tgz"
+  integrity sha512-2o3gi3caPVEqch0RQsMA+Rl3xtKbUL0FJ2vXtNNZYwN/05m4woJ1UWV00dxCl1h36LyK7L4dn3Q+ySQi2YXQYA==
+  dependencies:
+    "@1inch/byte-utils" "3.0.0"
+    ethers "6.13.5"
+
 "@adraffy/ens-normalize@1.10.1":
   version "1.10.1"
   resolved "https://registry.npmjs.org/@adraffy/ens-normalize/-/ens-normalize-1.10.1.tgz"
@@ -737,7 +766,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/cors@^2.8.12":
+"@types/cors@^2.8.12", "@types/cors@^2.8.19":
   version "2.8.19"
   resolved "https://registry.npmjs.org/@types/cors/-/cors-2.8.19.tgz"
   integrity sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==
@@ -935,7 +964,7 @@ asynckit@^0.4.0:
   resolved "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
-axios@^1.7.9:
+axios@^1.7.9, "axios@>=1 <2":
   version "1.11.0"
   resolved "https://registry.npmjs.org/axios/-/axios-1.11.0.tgz"
   integrity sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==
@@ -1192,7 +1221,7 @@ cookie@^0.7.1, cookie@~0.7.2:
   resolved "https://registry.npmjs.org/cookie/-/cookie-0.7.2.tgz"
   integrity sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==
 
-cors@~2.8.5:
+cors@^2.8.5, cors@~2.8.5:
   version "2.8.5"
   resolved "https://registry.npmjs.org/cors/-/cors-2.8.5.tgz"
   integrity sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==
@@ -1421,10 +1450,23 @@ etag@^1.8.1:
   resolved "https://registry.npmjs.org/etag/-/etag-1.8.1.tgz"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
 
-ethers@^6.15.0:
+ethers@^6.14.1, ethers@^6.15.0:
   version "6.15.0"
   resolved "https://registry.npmjs.org/ethers/-/ethers-6.15.0.tgz"
   integrity sha512-Kf/3ZW54L4UT0pZtsY/rf+EkBU7Qi5nnhonjUb8yTXcxH3cdcWrV2cRyk0Xk/4jK6OoHhxxZHriyhje20If2hQ==
+  dependencies:
+    "@adraffy/ens-normalize" "1.10.1"
+    "@noble/curves" "1.2.0"
+    "@noble/hashes" "1.3.2"
+    "@types/node" "22.7.5"
+    aes-js "4.0.0-beta.5"
+    tslib "2.7.0"
+    ws "8.17.1"
+
+ethers@6.13.5:
+  version "6.13.5"
+  resolved "https://registry.npmjs.org/ethers/-/ethers-6.13.5.tgz"
+  integrity sha512-+knKNieu5EKRThQJWwqaJ10a6HE9sSehGeqWN65//wE7j47ZpFhKAnHB/JJFibwwg61I/koxaPsXbXpD/skNOQ==
   dependencies:
     "@adraffy/ens-normalize" "1.10.1"
     "@noble/curves" "1.2.0"
@@ -3030,7 +3072,7 @@ write-file-atomic@^3.0.0:
     signal-exit "^3.0.2"
     typedarray-to-buffer "^3.1.5"
 
-ws@^8.18.0, ws@^8.18.3, ws@^8.8.1:
+ws@^8.18.0, ws@^8.18.2, ws@^8.18.3, ws@^8.8.1:
   version "8.18.3"
   resolved "https://registry.npmjs.org/ws/-/ws-8.18.3.tgz"
   integrity sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==
