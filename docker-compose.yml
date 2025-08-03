@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  ui:
+    build: 
+      context: ./ui
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - relayer
+    restart: unless-stopped
+
+  relayer:
+    build: 
+      context: ./relayer
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - relayer/.env.production
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
